@@ -742,8 +742,25 @@ def _validate_value_with_model_field(
     return field.validate(value, values, loc=loc)
 
 
+def _annotation_has_json(annotation: Any) -> bool:
+    if annotation is None:
+        return False
+    from fastapi.types import UnionType
+
+    origin = get_origin(annotation)
+    if origin is Annotated:
+        args = get_args(annotation)
+        if any(type(item) is Json for item in args[1:]):
+            return True
+        return _annotation_has_json(args[0])
+    if origin is Union or origin is UnionType:
+        return any(_annotation_has_json(arg) for arg in get_args(annotation))
+    return False
+
+
 def _is_json_field(field: ModelField) -> bool:
-    return any(type(item) is Json for item in field.field_info.metadata)
+    return any(type(item) is Json for item in field.field_info.metadata) or _annotation_has_json(field.field_info.annotation)
+
 
 
 def _get_multidict_value(
