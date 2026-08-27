@@ -1418,3 +1418,66 @@ def test_fallback_file_exists_is_async_and_non_blocking(tmp_path: Path):
     )
 
     assert inspect.iscoroutinefunction(static_files._fallback_file_exists)
+
+
+def test_fallback_runs_in_worker_thread(tmp_path: Path):
+    import threading
+
+    dist = tmp_path / "dist"
+    dist.mkdir(parents=True, exist_ok=True)
+    (dist / "404.html").write_text("not found")
+
+    app = FastAPI()
+    app.frontend("/", directory=dist)
+
+    frontend_route = app.router._frontend_routes.routes[0]
+    static_files = frontend_route.app
+
+    original_lookup = static_files.lookup_path
+    original_get_response = static_files.get_response
+
+    called_threads = []
+    loop_thread = None
+
+    async def mock_get_response(path, scope):
+        nonlocal loop_thread
+        loop_thread = threading.current_thread()
+        return await original_get_response(path, scope)
+
+    def mock_lookup(path: str):
+        called_threads.append((path, threading.current_thread()))
+        return original_lookup(path)
+
+    static_files.get_response = mock_get_response
+    static_files.lookup_path = mock_lookup
+
+    # 1. Test 404.html fallback check
+    client = TestClient(app)
+    response = client.get("/missing", headers={"accept": "text/html"})
+    assert response.status_code == 404
+    assert response.text == "not found"
+
+    main_thread = threading.current_thread()
+    assert loop_thread is not None
+    assert loop_thread is not main_thread
+
+    assert any(path == "404.html" for path, _ in called_threads)
+    for path, thread in called_threads:
+        if path == "404.html":
+            assert thread is not loop_thread
+
+    # 2. Test index.html fallback check
+    (dist / "404.html").unlink()
+    (dist / "index.html").write_text("index")
+    called_threads.clear()
+
+    response = client.get("/missing", headers={"accept": "text/html"})
+    assert response.status_code == 200
+    assert response.text == "index"
+
+    assert any(path == "index.html" for path, _ in called_threads)
+    for path, thread in called_threads:
+        if path == "index.html":
+            assert thread is not loop_thread
+
+
