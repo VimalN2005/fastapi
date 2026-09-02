@@ -1674,6 +1674,14 @@ class _IncludedRouter(BaseRoute):
             return _EffectiveRouteContext(
                 original_route=route,
                 starlette_route=starlette_route,
+                path=starlette_route.path,
+                path_format=starlette_route.path_format,
+                path_regex=starlette_route.path_regex,
+                param_convertors=starlette_route.param_convertors,
+                methods=starlette_route.methods,
+                name=starlette_route.name,
+                endpoint=starlette_route.endpoint,
+                include_in_schema=starlette_route.include_in_schema,
             )
         if isinstance(route, APIWebSocketRoute):
             starlette_route = APIWebSocketRoute(
@@ -1688,6 +1696,17 @@ class _IncludedRouter(BaseRoute):
             return _EffectiveRouteContext(
                 original_route=route,
                 starlette_route=starlette_route,
+                path=starlette_route.path,
+                path_format=starlette_route.path_format,
+                path_regex=starlette_route.path_regex,
+                param_convertors=starlette_route.param_convertors,
+                name=starlette_route.name,
+                endpoint=starlette_route.endpoint,
+                dependencies=starlette_route.dependencies,
+                dependant=starlette_route.dependant,
+                dependency_overrides_provider=(
+                    self.include_context.dependency_overrides_provider
+                ),
             )
         if isinstance(route, routing.WebSocketRoute):
             starlette_route = routing.WebSocketRoute(
@@ -1696,6 +1715,12 @@ class _IncludedRouter(BaseRoute):
             return _EffectiveRouteContext(
                 original_route=route,
                 starlette_route=starlette_route,
+                path=starlette_route.path,
+                path_format=starlette_route.path_format,
+                path_regex=starlette_route.path_regex,
+                param_convertors=starlette_route.param_convertors,
+                name=starlette_route.name,
+                endpoint=starlette_route.endpoint,
             )
         if isinstance(route, routing.Mount):
             starlette_route = copy.copy(route)
@@ -1708,6 +1733,11 @@ class _IncludedRouter(BaseRoute):
             return _EffectiveRouteContext(
                 original_route=route,
                 starlette_route=starlette_route,
+                path=starlette_route.path,
+                path_format=starlette_route.path_format,
+                path_regex=starlette_route.path_regex,
+                param_convertors=starlette_route.param_convertors,
+                name=starlette_route.name,
             )
         if isinstance(route, routing.Host):
             if self.include_context.prefix:
@@ -1722,6 +1752,7 @@ class _IncludedRouter(BaseRoute):
             return _EffectiveRouteContext(
                 original_route=route,
                 starlette_route=starlette_route,
+                name=starlette_route.name,
             )
         return None
 

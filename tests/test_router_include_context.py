@@ -1073,3 +1073,59 @@ async def test_apirouter_handle_fallback_without_include_context():
     assert messages[0]["type"] == "http.response.start"
     assert messages[0]["status"] == 200
     assert messages[1]["body"] == b"items"
+
+
+def test_iter_route_contexts_populates_effective_paths_for_prefixed_routes():
+    from starlette.routing import Mount, Route, WebSocketRoute
+
+    router = APIRouter()
+
+    @router.websocket("/stream/{job_id}")
+    async def ws_stream(websocket):  # pragma: no cover
+        pass
+
+    async def plain_ws(websocket):  # pragma: no cover
+        pass
+
+    def plain_http(request):  # pragma: no cover
+        return PlainTextResponse("plain")
+
+    router.routes.append(WebSocketRoute("/plain_ws/{id}", plain_ws, name="plain_ws"))
+    router.routes.append(Route("/plain_http/{id}", plain_http, name="plain_http"))
+    router.routes.append(Mount("/sub_mount", app=FastAPI(), name="sub_mount"))
+
+    app = FastAPI()
+    app.include_router(router, prefix="/api/v1")
+
+    contexts_by_type = {
+        type(ctx.original_route).__name__: ctx
+        for ctx in iter_route_contexts(app.routes)
+    }
+
+    assert "APIWebSocketRoute" in contexts_by_type
+    ws_ctx = contexts_by_type["APIWebSocketRoute"]
+    assert ws_ctx.path == "/api/v1/stream/{job_id}"
+    assert ws_ctx.path_format == "/api/v1/stream/{job_id}"
+    assert ws_ctx.name == "ws_stream"
+    assert ws_ctx.endpoint is ws_stream
+
+    assert "WebSocketRoute" in contexts_by_type
+    plain_ws_ctx = contexts_by_type["WebSocketRoute"]
+    assert plain_ws_ctx.path == "/api/v1/plain_ws/{id}"
+    assert plain_ws_ctx.path_format == "/api/v1/plain_ws/{id}"
+    assert plain_ws_ctx.name == "plain_ws"
+    assert plain_ws_ctx.endpoint is plain_ws
+
+    plain_http_ctx = next(
+        ctx for ctx in iter_route_contexts(app.routes) if ctx.name == "plain_http"
+    )
+    assert plain_http_ctx.path == "/api/v1/plain_http/{id}"
+    assert plain_http_ctx.path_format == "/api/v1/plain_http/{id}"
+    assert plain_http_ctx.endpoint is plain_http
+
+    assert "Mount" in contexts_by_type
+    mount_ctx = contexts_by_type["Mount"]
+    assert mount_ctx.path == "/api/v1/sub_mount"
+    assert mount_ctx.path_format == "/api/v1/sub_mount/{path}"
+    assert mount_ctx.name == "sub_mount"
+
