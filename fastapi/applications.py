@@ -1,5 +1,5 @@
 import os
-from collections.abc import Awaitable, Callable, Coroutine, Sequence
+from collections.abc import Awaitable, Callable, Coroutine, Mapping, Sequence
 from enum import Enum
 from typing import Annotated, Any, Literal, TypeVar
 
@@ -678,7 +678,7 @@ class FastAPI(Starlette):
             ),
         ] = True,
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses to be shown in OpenAPI.
@@ -1174,7 +1174,7 @@ class FastAPI(Starlette):
         summary: str | None = None,
         description: str | None = None,
         response_description: str = "Successful Response",
-        responses: dict[int | str, dict[str, Any]] | None = None,
+        responses: Mapping[int | str, Any] | None = None,
         deprecated: bool | None = None,
         methods: list[str] | None = None,
         operation_id: str | None = None,
@@ -1309,7 +1309,7 @@ class FastAPI(Starlette):
         summary: str | None = None,
         description: str | None = None,
         response_description: str = "Successful Response",
-        responses: dict[int | str, dict[str, Any]] | None = None,
+        responses: Mapping[int | str, Any] | None = None,
         deprecated: bool | None = None,
         methods: list[str] | None = None,
         operation_id: str | None = None,
@@ -1486,7 +1486,7 @@ class FastAPI(Starlette):
             ),
         ] = None,
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses to be shown in OpenAPI.
@@ -1770,7 +1770,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -2143,7 +2143,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -2521,7 +2521,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -2899,7 +2899,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -3272,7 +3272,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -3645,7 +3645,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -4018,7 +4018,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -4396,7 +4396,7 @@ class FastAPI(Starlette):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.

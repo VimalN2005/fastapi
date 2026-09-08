@@ -938,7 +938,7 @@ class _APIRouteLike(Protocol):
     generate_unique_id_function: Callable[[Any], str] | DefaultPlaceholder
     strict_content_type: bool | DefaultPlaceholder
     tags: list[str | Enum]
-    responses: dict[int | str, dict[str, Any]]
+    responses: dict[int | str, Any]
     name: str
     path_regex: Any
     path_format: str
@@ -970,7 +970,7 @@ def _populate_api_route_state(
     summary: str | None = None,
     description: str | None = None,
     response_description: str = "Successful Response",
-    responses: dict[int | str, dict[str, Any]] | None = None,
+    responses: Mapping[int | str, Any] | None = None,
     deprecated: bool | None = None,
     name: str | None = None,
     methods: set[str] | list[str] | None = None,
@@ -1013,7 +1013,7 @@ def _populate_api_route_state(
     route.generate_unique_id_function = generate_unique_id_function
     route.strict_content_type = strict_content_type
     route.tags = tags or []
-    route.responses = responses or {}
+    route.responses = dict(responses) if responses else {}
     route.name = get_name(endpoint) if name is None else name
     route.path_regex, route.path_format, route.param_convertors = compile_path(path)
     if methods is None:
@@ -1144,7 +1144,7 @@ class APIRoute(routing.Route):
     generate_unique_id_function: Callable[[Any], str] | DefaultPlaceholder
     strict_content_type: bool | DefaultPlaceholder
     tags: list[str | Enum]
-    responses: dict[int | str, dict[str, Any]]
+    responses: dict[int | str, Any]
     unique_id: str
     status_code: int | None
     response_field: ModelField | None
@@ -1170,7 +1170,7 @@ class APIRoute(routing.Route):
         summary: str | None = None,
         description: str | None = None,
         response_description: str = "Successful Response",
-        responses: dict[int | str, dict[str, Any]] | None = None,
+        responses: Mapping[int | str, Any] | None = None,
         deprecated: bool | None = None,
         name: str | None = None,
         methods: set[str] | list[str] | None = None,
@@ -1290,7 +1290,7 @@ class _RouterIncludeContext:
     default_response_class: type[Response] | DefaultPlaceholder = field(
         default_factory=lambda: Default(JSONResponse)
     )
-    responses: dict[int | str, dict[str, Any]] = field(default_factory=dict)
+    responses: dict[int | str, Any] = field(default_factory=dict)
     callbacks: list[BaseRoute] = field(default_factory=list)
     deprecated: bool | None = None
     include_in_schema: bool = True
@@ -1314,7 +1314,7 @@ class _RouterIncludeContext:
         default_response_class: type[Response] | DefaultPlaceholder = Default(
             JSONResponse
         ),
-        responses: dict[int | str, dict[str, Any]] | None = None,
+        responses: Mapping[int | str, Any] | None = None,
         callbacks: list[BaseRoute] | None = None,
         deprecated: bool | None = None,
         include_in_schema: bool = True,
@@ -1403,7 +1403,7 @@ class _EffectiveRouteContext:
         default_factory=lambda: Default(True)
     )
     tags: list[str | Enum] = field(default_factory=list)
-    responses: dict[int | str, dict[str, Any]] = field(default_factory=dict)
+    responses: dict[int | str, Any] = field(default_factory=dict)
     name: str = ""
     path_regex: Any = None
     path_format: str = ""
@@ -2321,7 +2321,7 @@ class APIRouter(routing.Router):
             ),
         ] = Default(JSONResponse),
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses to be shown in OpenAPI.
@@ -2898,7 +2898,7 @@ class APIRouter(routing.Router):
         summary: str | None = None,
         description: str | None = None,
         response_description: str = "Successful Response",
-        responses: dict[int | str, dict[str, Any]] | None = None,
+        responses: Mapping[int | str, Any] | None = None,
         deprecated: bool | None = None,
         methods: set[str] | list[str] | None = None,
         operation_id: str | None = None,
@@ -2981,7 +2981,7 @@ class APIRouter(routing.Router):
         summary: str | None = None,
         description: str | None = None,
         response_description: str = "Successful Response",
-        responses: dict[int | str, dict[str, Any]] | None = None,
+        responses: Mapping[int | str, Any] | None = None,
         deprecated: bool | None = None,
         methods: list[str] | None = None,
         operation_id: str | None = None,
@@ -3173,7 +3173,7 @@ class APIRouter(routing.Router):
             ),
         ] = Default(JSONResponse),
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses to be shown in OpenAPI.
@@ -3446,7 +3446,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -3823,7 +3823,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -4205,7 +4205,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -4587,7 +4587,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -4964,7 +4964,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -5341,7 +5341,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -5723,7 +5723,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
@@ -6105,7 +6105,7 @@ class APIRouter(routing.Router):
             ),
         ] = "Successful Response",
         responses: Annotated[
-            dict[int | str, dict[str, Any]] | None,
+            Mapping[int | str, Any] | None,
             Doc(
                 """
                 Additional responses that could be returned by this *path operation*.
