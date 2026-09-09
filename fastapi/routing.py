@@ -1013,7 +1013,9 @@ def _populate_api_route_state(
     route.generate_unique_id_function = generate_unique_id_function
     route.strict_content_type = strict_content_type
     route.tags = tags or []
-    route.responses = dict(responses) if responses else {}
+    route.responses = (
+        {k: dict(v) for k, v in responses.items()} if responses else {}
+    )
     route.name = get_name(endpoint) if name is None else name
     route.path_regex, route.path_format, route.param_convertors = compile_path(path)
     if methods is None:

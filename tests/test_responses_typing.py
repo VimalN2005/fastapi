@@ -67,3 +67,25 @@ def test_responses_with_typeddict_mapping_on_router() -> None:
     item_responses = openapi["paths"]["/api/items"]["post"]["responses"]
     assert "400" in item_responses
     assert "404" in item_responses
+
+
+def test_responses_with_mappingproxy() -> None:
+    from types import MappingProxyType
+
+    immutable_response = MappingProxyType(
+        {"model": ErrorResponse, "description": "Immutable Bad Request"}
+    )
+    app = FastAPI()
+
+    @app.get("/items", responses={400: immutable_response})
+    def read_items() -> dict[str, str]:
+        return {"hello": "world"}
+
+    client = TestClient(app)
+    response = client.get("/items")
+    assert response.status_code == 200
+
+    openapi = app.openapi()
+    resp_400 = openapi["paths"]["/items"]["get"]["responses"]["400"]
+    assert resp_400["description"] == "Immutable Bad Request"
+    assert "$ref" in resp_400["content"]["application/json"]["schema"]
