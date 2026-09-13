@@ -635,14 +635,16 @@ def get_request_handler(
                 response_args = _build_response_args(
                     status_code=status_code, solved_result=solved_result
                 )
-                response = StreamingResponse(
+                response = actual_response_class(
                     sse_stream_content,
                     media_type="text/event-stream",
                     **response_args,
                 )
-                response.headers["Cache-Control"] = "no-cache"
+                if "Cache-Control" not in response.headers:
+                    response.headers["Cache-Control"] = "no-cache"
                 # For Nginx proxies to not buffer server sent events
-                response.headers["X-Accel-Buffering"] = "no"
+                if "X-Accel-Buffering" not in response.headers:
+                    response.headers["X-Accel-Buffering"] = "no"
                 response.headers.raw.extend(solved_result.response.headers.raw)
             elif is_json_stream:
                 # Generator endpoint: stream as JSONL
